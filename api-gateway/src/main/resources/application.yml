@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/**
+
+        - id: kyc-service
+          uri: lb://kyc-service
+          predicates:
+            - Path=/api/kyc/**
+
+        - id: bank-service
+          uri: lb://bank-service
+          predicates:
+            - Path=/api/banks/**, /api/bank-accounts/** , /api/loan-offers/**
+
+        - id: loan-service
+          uri: lb://loan-service
+          predicates:
+            - Path=/api/loans/**
+
+        - id: mandate-service
+          uri: lb://mandate-service
+          predicates:
+            - Path=/api/mandates/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
