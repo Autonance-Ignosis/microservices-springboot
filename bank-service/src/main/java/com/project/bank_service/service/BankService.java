@@ -49,4 +49,10 @@ public class BankService {
     public Bank findBankByAdminUserId(Long adminUserId) {
         return bankRepository.findByAdminUserId(adminUserId);
     }
+
+    public Bank findBankByBankIdUserId(Long bankId, Long userId) {
+        return bankRepository.findByIdAndAdminUserId(bankId, userId);
+    }
+
+
 }
