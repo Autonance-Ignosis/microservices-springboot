@@ -6,8 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/banks")
 public class BankController {
@@ -60,4 +63,30 @@ public class BankController {
         Bank bank=bankService.findBankByAdminUserId(id);
         return bank != null ? ResponseEntity.ok(bank) : ResponseEntity.notFound().build();
     }
+
+    @PostMapping("/by-ids")
+    public ResponseEntity<List<Bank>> getBanksByIds(@RequestBody List<Long> ids) {
+        List<Bank> banks = new ArrayList<>();
+
+        for (Long id : ids) {
+            Optional<Bank> bankOpt = bankService.getBankById(id);
+            if (bankOpt.isPresent()) {
+                banks.add(bankOpt.get());
+            }
+        }
+        return ResponseEntity.ok(banks);
+    }
+
+
+    @GetMapping("/id/{bankId}/{userId}")
+    public Bank getBank(@PathVariable Long bankId, @PathVariable Long userId) {
+        Bank bank = bankService.findBankByBankIdUserId(bankId, userId);
+        if (bank == null) {
+            System.out.println("No matching bank found for id=" + bankId + " and userId=" + userId);
+        } else {
+            System.out.println("✅ Found bank: " + bank);
+        }
+        return bank;
+    }
+
 }

@@ -62,5 +62,10 @@ public class BankAccountService {
         }
     }
 
+    public List<BankAccount> getBankAccountByBankIdAndUserId(Long bankId, Long userId) {
+        return bankAccountRepository.findByBankIdAndUserId(bankId, userId);
+    }
+
+
 
 }

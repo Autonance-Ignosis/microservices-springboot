@@ -8,5 +8,6 @@ public interface BankRepository extends JpaRepository<Bank, Long> {
     // Find a bank by its IFSC code
     Bank findByIfsc(String ifsc);
     Bank findByAdminUserId(Long adminUserId);
+    Bank findByIdAndAdminUserId(Long id, Long adminUserId);
 
 }
