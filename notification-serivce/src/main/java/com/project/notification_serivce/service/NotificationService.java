@@ -14,21 +14,26 @@ public class NotificationService {
 
     private final NotificationSocketHandler socketHandler;
 
-    public void notifyLoanStatus(LoanEvent event) {
-        String msg = "Loan of ₹" + event.getAmount() + " is " + event.getStatus();
-        send(event.getUserId(), msg);
-    }
-
-    public void notifyMandateStatus(MandateEvent event) {
-        String msg = "Mandate is " + event.getStatus();
-        send(event.getUserId(), msg);
-    }
-
-    private void send(Long userId, String message) {
+    public void sendNotification(Long userId, String message) {
         try {
             socketHandler.sendNotification(userId, message);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
+    public void notifyLoanStatus(LoanEvent event) {
+        String msg = "Loan of ₹" + event.getAmount() + " is " + event.getStatus();
+        System.out.println("Sending notification: " + msg);
+        sendNotification(event.getUserId(), msg);
+    }
+
+    public void notifyMandateStatus(MandateEvent event) {
+        String msg = "Mandate is " + event.getStatus();
+        System.out.println("Sending notification: " + msg);
+        sendNotification(event.getUserId(), msg);
+    }
+
+
 }

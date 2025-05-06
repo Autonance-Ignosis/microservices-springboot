@@ -7,6 +7,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,32 +16,33 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class NotificationSocketHandler extends TextWebSocketHandler {
 
-    private final Map<Long, List<WebSocketSession>> userSessions = new ConcurrentHashMap<>();
-
-    public void sendNotification(Long userId, String message) throws IOException {
-        if (userSessions.containsKey(userId)) {
-            for (WebSocketSession session : userSessions.get(userId)) {
-                if (session.isOpen()) {
-                    session.sendMessage(new TextMessage(message));
-                }
-            }
-        }
-    }
+    private static final Map<Long, WebSocketSession> userSessions = new ConcurrentHashMap<>();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        Long userId = extractUserId(session); // from headers or query param
-        userSessions.computeIfAbsent(userId, k -> new ArrayList<>()).add(session);
+        // Parse userId from query param
+        Long userId = extractUserId(session.getUri());
+        userSessions.put(userId, session);
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        userSessions.values().forEach(list -> list.remove(session));
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        userSessions.values().remove(session);
     }
 
-    private Long extractUserId(WebSocketSession session) {
-        // e.g., from query param `?userId=123`
-        String query = session.getUri().getQuery();
-        return Long.parseLong(query.split("=")[1]);
+    public void sendNotification(Long userId, String message) throws IOException {
+        WebSocketSession session = userSessions.get(userId);
+        if (session != null && session.isOpen()) {
+            session.sendMessage(new TextMessage(message));
+        }
+    }
+
+    private Long extractUserId(URI uri) {
+        String query = uri.getQuery(); // userId=123
+        if (query != null && query.startsWith("userId=")) {
+            return Long.parseLong(query.split("=")[1]);
+        }
+        return null;
     }
 }
+
