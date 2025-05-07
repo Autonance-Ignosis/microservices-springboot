@@ -2,6 +2,7 @@ package com.project.notification_serivce.service;
 
 import com.project.loan_service.event.LoanEvent;
 import com.project.mandate_service.event.MandateEvent;
+import com.project.kyc_service.event.KycEvent;
 import com.project.notification_serivce.config.NotificationSocketHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,12 @@ public class NotificationService {
         String msg = "Mandate is " + event.getStatus();
         System.out.println("Sending notification: " + msg);
         sendNotification(event.getUserId(), msg);
+    }
+
+    public void notifyKycStatus(KycEvent event) {
+//        String msg = "KYC is " + event.getStatus();
+        System.out.println("Sending notification: " + event.getMessage() + " for user: " + event.getUserId());
+        sendNotification(event.getUserId(), event.getMessage());
     }
 
 
