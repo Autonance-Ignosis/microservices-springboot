@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/banks")
 public class BankController {
@@ -60,7 +59,9 @@ public class BankController {
 
     @GetMapping("/user/{id}")
     public ResponseEntity<Bank> getBankByUserId(@PathVariable Long id) {
+        System.out.println("Requested by user: " + id);
         Bank bank=bankService.findBankByAdminUserId(id);
+        System.out.println("Bank found: " + bank);
         return bank != null ? ResponseEntity.ok(bank) : ResponseEntity.notFound().build();
     }
 

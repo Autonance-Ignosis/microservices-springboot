@@ -77,17 +77,22 @@ public class SecurityConfig {
                                 }
                                 if(userOptional.get()!=null){
                                     User user = userOptional.get();
-                                    if(user.getRole()=="ADMIN"){
+                                    System.out.println("User found: " + user.getRole() + user);
+                                    if(user.getRole().equals("ADMIN")){
+                                        System.out.println("in 5174: ");
                                         response.sendRedirect("http://localhost:5174");
+
                                     }
-                                    else if(user.getRole()=="USER"){
+                                    else if(user.getRole().equals("USER")){
+                                        System.out.println("in 5173: ");
                                         response.sendRedirect("http://localhost:5173");
                                     }
                                     else{
+                                        System.out.println("in 5175: ");
+
                                         response.sendRedirect("http://localhost:5175");
                                     }
                                 }
-//                                response.sendRedirect("http://localhost:5173");
                             }
                         }).failureHandler(authenticationFailureHandler()))
                 .logout(logout -> logout
