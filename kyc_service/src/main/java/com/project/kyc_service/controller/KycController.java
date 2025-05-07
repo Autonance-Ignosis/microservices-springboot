@@ -4,12 +4,19 @@ import com.project.kyc_service.Utils.adharValidator;
 import com.project.kyc_service.entity.KycRecord;
 import com.project.kyc_service.services.CloudinaryService;
 import com.project.kyc_service.services.KycService;
+import com.project.kyc_service.services.S3Service;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +31,51 @@ public class KycController {
     private final CloudinaryService cloudinaryService ;
     private final PanValidator panValidator;
     private final adharValidator adharValidator;
+    private final S3Service s3Service;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucketName;
+
+//    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<?> uploadKyc(
+//            @RequestParam("userId") int userId,
+//            @RequestParam("panNo") String panNo,
+//            @RequestParam("aadhaarNo") String aadhaarNo,
+//            @RequestParam("panFile") MultipartFile panFile,
+//            @RequestParam("aadhaarFile") MultipartFile aadhaarFile
+//    ) throws Exception {
+//
+//        List<KycRecord> records = kycService.getKycRecordsByUserId(userId);
+//
+//        if (!records.isEmpty()) {
+//            KycRecord latest = records.get(0);
+//            if (latest.getStatus().equalsIgnoreCase("PENDING")) {
+//                return ResponseEntity
+//                        .status(HttpStatus.BAD_REQUEST)
+//                        .body("KYC already submitted and is under review.");
+//            }
+//
+//            if(latest.getStatus().equalsIgnoreCase("VERIFIED")) {
+//                return ResponseEntity
+//                        .status(HttpStatus.BAD_REQUEST)
+//                        .body("KYC already verified.");
+//            }
+//        }
+//
+//        String panFileUrl = cloudinaryService.uploadFile(panFile, "kyc");
+//        String aadhaarFileUrl = cloudinaryService.uploadFile(aadhaarFile, "kyc");
+//
+//        KycRecord saved = kycService.uploadKyc(
+//                userId, panNo, aadhaarNo, panFileUrl, aadhaarFileUrl
+//        );
+//
+//        return ResponseEntity.ok(saved);
+//    }
+
+
+
+
+
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadKyc(
@@ -31,35 +83,61 @@ public class KycController {
             @RequestParam("panNo") String panNo,
             @RequestParam("aadhaarNo") String aadhaarNo,
             @RequestParam("panFile") MultipartFile panFile,
-            @RequestParam("aadhaarFile") MultipartFile aadhaarFile
-    ) throws Exception {
+            @RequestParam("aadhaarFile") MultipartFile aadhaarFile) {
 
-        List<KycRecord> records = kycService.getKycRecordsByUserId(userId);
+        try {
+            List<KycRecord> records = kycService.getKycRecordsByUserId(userId);
 
-        if (!records.isEmpty()) {
-            KycRecord latest = records.get(0);
-            if (latest.getStatus().equalsIgnoreCase("PENDING")) {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body("KYC already submitted and is under review.");
+            if (!records.isEmpty()) {
+                KycRecord latest = records.get(0);
+                if ("PENDING".equalsIgnoreCase(latest.getStatus())) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("KYC already submitted and is under review.");
+                }
+                if ("VERIFIED".equalsIgnoreCase(latest.getStatus())) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("KYC already verified.");
+                }
             }
 
-            if(latest.getStatus().equalsIgnoreCase("VERIFIED")) {
-                return ResponseEntity
-                        .status(HttpStatus.BAD_REQUEST)
-                        .body("KYC already verified.");
-            }
+            // Save temp files
+            File panTemp = File.createTempFile("pan_" + userId + "_", panFile.getOriginalFilename());
+            panFile.transferTo(panTemp);
+            File aadhaarTemp = File.createTempFile("aadhaar_" + userId + "_", aadhaarFile.getOriginalFilename());
+            aadhaarFile.transferTo(aadhaarTemp);
+
+            // S3 upload keys
+            String panKey = "kyc/" + userId + "/pan_" + System.currentTimeMillis();
+            String aadhaarKey = "kyc/" + userId + "/aadhaar_" + System.currentTimeMillis();
+
+            // Upload to S3
+            s3Service.uploadFile(panKey, panTemp.getAbsolutePath());
+            s3Service.uploadFile(aadhaarKey, aadhaarTemp.getAbsolutePath());
+
+            // Get full URLs (assuming public bucket or presigned logic)
+            String panUrl = "https://" + bucketName + ".s3.amazonaws.com/" + panKey;
+            String aadhaarUrl = "https://" + bucketName + ".s3.amazonaws.com/" + aadhaarKey;
+
+            // Clean up
+            panTemp.delete();
+            aadhaarTemp.delete();
+
+            // Build response
+            Map<String, Object> response = new HashMap<>();
+            response.put("userId", userId);
+            response.put("panNo", panNo);
+            response.put("aadhaarNo", aadhaarNo);
+            response.put("panFileUrl", panUrl);
+            response.put("aadhaarFileUrl", aadhaarUrl);
+
+            return ResponseEntity.ok(response);
+
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("File upload failed: " + e.getMessage());
         }
-
-        String panFileUrl = cloudinaryService.uploadFile(panFile, "kyc");
-        String aadhaarFileUrl = cloudinaryService.uploadFile(aadhaarFile, "kyc");
-
-        KycRecord saved = kycService.uploadKyc(
-                userId, panNo, aadhaarNo, panFileUrl, aadhaarFileUrl
-        );
-
-        return ResponseEntity.ok(saved);
     }
+
 
 
     // Get KYC status
