@@ -76,7 +76,7 @@ public class SecurityConfig {
                                 if ("ADMIN".equals(user.getRole())) {
                                     response.sendRedirect("http://localhost:5174");
                                 } else if ("USER".equals(user.getRole())) {
-                                    response.sendRedirect("http://localhost:5173");
+                                    response.sendRedirect("http://localhost:5173/home");
                                 } else {
                                     response.sendRedirect("http://localhost:5175");
                                 }
