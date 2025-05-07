@@ -7,15 +7,18 @@ import com.project.loan_service.service.LoanService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import com.project.loan_service.Utill.TwilioService;
 
 @RestController
 @RequestMapping("/api/loans")
 public class LoanController {
 
     private final LoanService loanService;
+    private final TwilioService twilioService;
 
-    public LoanController(LoanService loanService) {
+    public LoanController(LoanService loanService, TwilioService twilioService) {
         this.loanService = loanService;
+        this.twilioService = twilioService;
     }
 
 
@@ -40,16 +43,18 @@ public class LoanController {
         return loanService.getLoansByUserId(userId);
     }
 
+
     @PutMapping("/{loanId}/approve")
     public Loan approveLoan(@PathVariable Long loanId) {
+        twilioService.sendSms("+917984603330", "Your loan application has been Accepted.");
         return loanService.approveLoan(loanId);
     }
 
     @PutMapping("/{loanId}/reject")
     public Loan rejectLoan(@PathVariable Long loanId) {
+        twilioService.sendSms("+917984603330", "Your loan application has been rejected.");
         return loanService.rejectLoan(loanId);
     }
-
 
     @GetMapping("/bank/{bankId}")
     public List<Loan> getLoansByBank(@PathVariable Long bankId) {
