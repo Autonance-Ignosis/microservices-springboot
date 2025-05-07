@@ -3,7 +3,10 @@ package com.project.kyc_service.services;
 import com.project.kyc_service.DAO.KycRecordRepository;
 import com.project.kyc_service.clients.UserClient;
 import com.project.kyc_service.entity.KycRecord;
+import com.project.kyc_service.event.KycEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +22,9 @@ public class KycService {
     private final KycRecordRepository repository;
 
     private final UserClient userClient;
+
+    @Autowired
+    private KafkaTemplate<String, Object> kafkaTemplate;
 
     public KycRecord uploadKyc(int userId, String panNo, String aadhaarNo,
                                String panFileUrl, String aadhaarFileUrl) throws IOException {
@@ -66,8 +72,21 @@ public class KycService {
         record.setRemarks(remarks);
         repository.save(record);
 
+        String message = "Your KYC status has been " + status + ".";
+        KycEvent kycEvent = new KycEvent((long) userId, status, message);
+
+        // 🔁 Send KYC status update to Kafka topic
+        kafkaTemplate.send("kyc-events", kycEvent);
+
+
+
+
+
+
         // 🔁 Update KYC status in USER-SERVICE via Feign
         userClient.updateKycStatus(userId, status);
+
+
 
         return record;
     }

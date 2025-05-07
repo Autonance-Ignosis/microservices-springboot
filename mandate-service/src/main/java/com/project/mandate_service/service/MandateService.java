@@ -71,9 +71,9 @@ public class  MandateService {
         mandate.setUpTo40Years(dto.getUpTo40Years());
 
         // Call Flask API to predict the mandate status
-        PredictionResult predictionResult = predictMandateStatus(dto);
-        mandate.setPredictionStatus(predictionResult.getStatus());
-        mandate.setPredictionProbability(predictionResult.getProbability());
+//        PredictionResult predictionResult = predictMandateStatus(dto);
+//        mandate.setPredictionStatus(predictionResult.getStatus());
+//        mandate.setPredictionProbability(predictionResult.getProbability());
         mandate.setUpdatedAt(System.currentTimeMillis());
 
         return mandateRepository.save(mandate);

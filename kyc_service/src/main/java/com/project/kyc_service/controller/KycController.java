@@ -130,6 +130,14 @@ public class KycController {
             response.put("panFileUrl", panUrl);
             response.put("aadhaarFileUrl", aadhaarUrl);
 
+            // Save KYC record
+            KycRecord saved = kycService.uploadKyc(
+                    userId, panNo, aadhaarNo, panUrl, aadhaarUrl
+            );
+            response.put("status", "KYC record saved successfully");
+            response.put("record", saved);
+            response.put("message", "KYC uploaded successfully");
+
             return ResponseEntity.ok(response);
 
         } catch (IOException e) {
