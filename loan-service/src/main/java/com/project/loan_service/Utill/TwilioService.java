@@ -22,12 +22,19 @@ public class TwilioService {
     public void sendSms(String phoneTo, String messageBody) {
         try {
             Twilio.init(accountSid, authToken);
-            Message message = Message.creator(
-                    new PhoneNumber(phoneTo),
-                    new PhoneNumber(phoneFrom),
-                    messageBody
-            ).create();
-            System.out.println("SMS Sent: " + message.getSid());
+//            Message message = Message.creator(
+//                    new PhoneNumber(phoneTo),
+//                    new PhoneNumber(phoneFrom),
+//                    messageBody
+//            ).create();
+//            System.out.println("SMS Sent: " + message.getSid());
+            Message message = Message
+                    .creator(new com.twilio.type.PhoneNumber(phoneTo),
+                            new com.twilio.type.PhoneNumber(phoneFrom),
+                            messageBody)
+                    .create();
+
+            System.out.println(message.getBody());
         } catch (ApiException e) {
             System.err.println("Error sending SMS: " + e.getMessage());
         }
