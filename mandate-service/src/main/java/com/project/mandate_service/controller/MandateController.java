@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/mandates")
 @RequiredArgsConstructor
@@ -16,6 +17,7 @@ public class MandateController {
 
     @PostMapping
     public Mandate createMandate(@RequestBody MandateRequestDto dto) {
+        System.out.println(dto);
         return mandateService.createMandate(dto);
     }
 

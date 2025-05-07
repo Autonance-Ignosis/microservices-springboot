@@ -40,16 +40,32 @@ public class  MandateService {
             throw new RuntimeException("Invalid or unauthorized loan.");
         }
 
-        // Validate Bank Account
-        if (!bankAccountIsValid(dto.getBankAccountId(), dto.getUserId())) {
-            throw new RuntimeException("Bank account not found or does not belong to user.");
-        }
+//        // Validate Bank Account
+//        if (!bankAccountIsValid(dto.getBankAccountId(), dto.getUserId())) {
+//            throw new RuntimeException("Bank account not found or does not belong to user.");
+//        }
 
         // All checks passed, create mandate
         Mandate mandate = new Mandate();
         mandate.setLoanId(dto.getLoanId());
         mandate.setUserId(dto.getUserId());
         mandate.setBankAccountId(dto.getBankAccountId());
+
+        // Set Mandate Details
+        mandate.setMandateVariant(dto.getMandateVariant());
+        mandate.setCategory(dto.getCategory());
+        mandate.setDebitType(dto.getDebitType());
+        mandate.setSeqType(dto.getSeqType());
+        mandate.setFreqType(dto.getFreqType());
+        mandate.setSchemaName(dto.getSchemaName());
+        mandate.setConsRefNo(dto.getConsRefNo());
+        mandate.setAmount(dto.getAmount());
+        mandate.setStartDate(dto.getStartDate());
+        mandate.setUptoDate(dto.getUptoDate());
+        mandate.setUpTo40Years(dto.getUpTo40Years());
+
+
+
         return mandateRepository.save(mandate);
     }
     public List<Mandate> findAllMandatesByBankAccountId(Long BankAccountId) {
@@ -57,8 +73,12 @@ public class  MandateService {
     }
 
     private boolean loanIsValid(Long loanId, Long userId) {
+        System.out.println(loanId);
+        System.out.println(userId);
         try {
             LoanDto loan = loanClient.getLoan(loanId);
+            System.out.println(loan);
+            System.out.println(loan.getUserId());
             return loan != null && loan.getUserId().equals(userId) && "APPROVED".equals(loan.getStatus());
         } catch (Exception e) {
             return false;
@@ -67,7 +87,10 @@ public class  MandateService {
 
     private boolean bankAccountIsValid(Long bankAccountId, Long userId) {
         try {
+            System.out.println("BankAccountId: " + bankAccountId);
             BankAccountResponse account = bankAccountClient.getBankAccount(bankAccountId);
+            System.out.println("Account: " + account);
+
             return account != null && account.getUserId().equals(userId);
         } catch (Exception e) {
             return false;
