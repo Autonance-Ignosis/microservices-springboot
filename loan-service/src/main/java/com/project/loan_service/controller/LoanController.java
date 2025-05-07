@@ -46,13 +46,13 @@ public class LoanController {
 
     @PutMapping("/{loanId}/approve")
     public Loan approveLoan(@PathVariable Long loanId) {
-        twilioService.sendSms("+917984603330", "Your loan application has been Accepted.");
+        twilioService.sendSms("", "Your loan application has been Accepted.");
         return loanService.approveLoan(loanId);
     }
 
     @PutMapping("/{loanId}/reject")
     public Loan rejectLoan(@PathVariable Long loanId) {
-        twilioService.sendSms("+917984603330", "Your loan application has been rejected.");
+        twilioService.sendSms("", "Your loan application has been rejected.");
         return loanService.rejectLoan(loanId);
     }
 
