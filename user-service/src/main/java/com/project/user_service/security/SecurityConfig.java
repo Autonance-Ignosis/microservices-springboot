@@ -54,46 +54,35 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for simplicity (enable it in production)
                 .oauth2Login(oauth2Login -> oauth2Login
                         .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint.oidcUserService(oidcUserService()))
-                        .successHandler(new AuthenticationSuccessHandler() {
-                            @Override
-                            public void onAuthenticationSuccess(HttpServletRequest request,
-                                                                HttpServletResponse response, Authentication authentication)
-                                    throws IOException, ServletException {
-                                String email = ((org.springframework.security.oauth2.core.oidc.user.OidcUser) authentication
-                                        .getPrincipal()).getEmail();
-                                String fullname = ((org.springframework.security.oauth2.core.oidc.user.OidcUser) authentication
-                                        .getPrincipal()).getFullName();
-                                String picture = ((org.springframework.security.oauth2.core.oidc.user.OidcUser) authentication
-                                        .getPrincipal()).getPicture();
-                                Optional<User> userOptional = userService.findUserByEmail(email);
-                                System.out.println("User found: " + userOptional);
-                                if (userOptional.isEmpty()) {
-                                    User user = new User();
-                                    user.setEmail(email);
-                                    user.setFullName(fullname);
-                                    user.setPicture(picture);
-                                    User u = userService.saveUser(user);
-                                    System.out.println("New User saved: " + u);
-                                }
-                                if(userOptional.get()!=null){
-                                    User user = userOptional.get();
-                                    System.out.println("User found: " + user.getRole() + user);
-                                    if(user.getRole().equals("ADMIN")){
-                                        System.out.println("in 5174: ");
-                                        response.sendRedirect("http://localhost:5174");
-
-                                    }
-                                    else if(user.getRole().equals("USER")){
-                                        System.out.println("in 5173: ");
-                                        response.sendRedirect("http://localhost:5173");
-                                    }
-                                    else{
-                                        System.out.println("in 5175: ");
-
-                                        response.sendRedirect("http://localhost:5175");
-                                    }
+                        .successHandler((request, response, authentication) -> {
+                            String email = ((org.springframework.security.oauth2.core.oidc.user.OidcUser) authentication
+                                    .getPrincipal()).getEmail();
+                            String fullname = ((org.springframework.security.oauth2.core.oidc.user.OidcUser) authentication
+                                    .getPrincipal()).getFullName();
+                            String picture = ((org.springframework.security.oauth2.core.oidc.user.OidcUser) authentication
+                                    .getPrincipal()).getPicture();
+                            Optional<User> userOptional = userService.findUserByEmail(email);
+                            System.out.println("User found: " + userOptional);
+                            if (userOptional.isEmpty()) {
+                                User user = new User();
+                                user.setEmail(email);
+                                user.setFullName(fullname);
+                                user.setPicture(picture);
+                                User u = userService.saveUser(user);
+                                System.out.println("New User saved: " + u);
+                            }
+                            if (userOptional.isPresent()) {
+                                User user = userOptional.get();
+                                if ("ADMIN".equals(user.getRole())) {
+                                    response.sendRedirect("http://localhost:5174");
+                                } else if ("USER".equals(user.getRole())) {
+                                    response.sendRedirect("http://localhost:5173");
+                                } else {
+                                    response.sendRedirect("http://localhost:5175");
                                 }
                             }
+
+//                                response.sendRedirect("http://localhost:5173");
                         }).failureHandler(authenticationFailureHandler()))
                 .logout(logout -> logout
                         .logoutUrl("/api/logout")
