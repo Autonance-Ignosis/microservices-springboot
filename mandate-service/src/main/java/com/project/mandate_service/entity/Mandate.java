@@ -10,7 +10,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "mandates_test")
+@Table(name = "mandates")
 public class Mandate {
 
     @Id
@@ -71,4 +71,11 @@ public class Mandate {
     private Long createdAt = System.currentTimeMillis();
 
     private Long updatedAt = System.currentTimeMillis();
+
+    // Prediction-related fields
+    @Column(name = "prediction_status")
+    private String predictionStatus; // APPROVED or REJECTED based on model prediction
+
+    @Column(name = "prediction_probability")
+    private Double predictionProbability; // Probability score of the prediction (optional)
 }
