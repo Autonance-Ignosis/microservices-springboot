@@ -16,4 +16,5 @@ public class LoanDto {
     private Double emi;
     private LocalDate nextEmiDate;
     private String status;  // e.g., "APPROVED"
+    private Long appliedBankId;
 }

@@ -180,4 +180,6 @@ public class LoanService {
         loan.setStatus(Loan.LoanStatus.REJECTED);
         return loanRepository.save(loan);
     }
+
+
 }

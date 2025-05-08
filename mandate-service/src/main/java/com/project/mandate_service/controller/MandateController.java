@@ -21,6 +21,11 @@ public class MandateController {
         return mandateService.createMandate(dto);
     }
 
+    @GetMapping("/{id}")
+    public Mandate getMandateById(@PathVariable Long id) {
+        return mandateService.getMandateById(id);
+    }
+
     @GetMapping("/user/{userId}")
     public List<Mandate> getByUser(@PathVariable Long userId) {
         return mandateService.getMandatesByUserId(userId);
@@ -47,8 +52,13 @@ public class MandateController {
         return mandateService.getApprovedMandatesDueToday();
     }
 
-    @GetMapping("/bank/{id}")
+    @GetMapping("/bank-account/{id}")
     public List<Mandate>findAllMandatesBankAccountId(@PathVariable Long id) {
         return mandateService.findAllMandatesByBankAccountId(id);
+    }
+
+    @GetMapping("/bank/{id}")
+    public List<Mandate> getMandatesByBankId(@PathVariable Long id) {
+        return mandateService.getMandatesByLoanOfBankId(id);
     }
 }

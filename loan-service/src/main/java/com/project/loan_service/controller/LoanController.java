@@ -4,6 +4,7 @@ import com.project.loan_service.dto.LoanDto;
 import com.project.loan_service.dto.LoanRequestDto;
 import com.project.loan_service.entity.Loan;
 import com.project.loan_service.service.LoanService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +25,9 @@ public class LoanController {
 
 
     @GetMapping
-    public List<Loan> getAllLoans() {
-        return loanService.getAllLoans();
+    public ResponseEntity<List<Loan>> getAllLoans() {
+        List<Loan> loans = loanService.getAllLoans();
+        return ResponseEntity.ok(loans);
     }
 
     @PostMapping

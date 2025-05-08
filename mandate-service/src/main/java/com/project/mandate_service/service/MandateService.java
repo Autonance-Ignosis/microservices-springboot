@@ -40,6 +40,10 @@ public class  MandateService {
 
     private static final String FLASK_API_URL = "http://127.0.0.1:5000/mandate/predict";  // Flask server URL
 
+    public Mandate getMandateById(Long id) {
+        return mandateRepository.findById(id).orElseThrow();
+    }
+
     public Mandate createMandate(MandateRequestDto dto) {
         // Check for existing mandate
         if (mandateRepository.findByLoanIdAndUserId(dto.getLoanId(), dto.getUserId()).isPresent()) {
@@ -181,5 +185,20 @@ public class  MandateService {
                     return loan.getNextEmiDate().isEqual(today);
                 })
                 .toList();
+    }
+
+
+    public List<Mandate> getMandatesByLoanOfBankId(Long bankId) {
+        List<LoanDto> loans = loanClient.getLoansByBank(bankId);
+
+
+        List<Long> loanIds = loans.stream()
+                .filter(loan -> loan.getAppliedBankId().equals(bankId))
+                .map(LoanDto::getId)
+                .toList();
+
+        return mandateRepository.findByLoanIdIn(loanIds);
+
+
     }
 }

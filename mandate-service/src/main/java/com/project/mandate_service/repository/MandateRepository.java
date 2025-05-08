@@ -17,4 +17,6 @@ public interface MandateRepository extends JpaRepository<Mandate, Long> {
     List<Mandate> findApprovedMandates();
 
     List<Mandate>findAllMandatesByBankAccountId(Long bankId);
+
+    List<Mandate> findByLoanIdIn(List<Long> loanIds);
 }
