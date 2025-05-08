@@ -15,4 +15,6 @@ public interface KycRecordRepository extends JpaRepository<KycRecord, Long> {
 
     List<KycRecord> findAll();
 
+    long countByStatusIgnoreCase(String status);
+
 }

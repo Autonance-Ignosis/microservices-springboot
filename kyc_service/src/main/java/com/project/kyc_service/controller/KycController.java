@@ -185,6 +185,21 @@ public class KycController {
     }
 
 
+    @GetMapping("/stats")
+    public Map<String, Object> getDashboardStats() {
+        long totalRequests = kycService.getTotalRequestsCount();
+        long pendingRequests = kycService.getRequestsByStatusCount("PENDING");
+        long approvedRequests = kycService.getRequestsByStatusCount("VERIFIED");
+
+        return Map.of(
+                "totalRequests", totalRequests,
+                "pendingRequests", pendingRequests,
+                "approvedRequests", approvedRequests
+        );
+    }
+
+
+
 //    @PostMapping("/validate-pan")
 //    public ResponseEntity<?> validatePan(@RequestBody Map<String, String> requestBody) {
 //        String pan = requestBody.get("pan");

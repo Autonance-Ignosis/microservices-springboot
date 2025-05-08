@@ -100,4 +100,13 @@ public class KycService {
     }
 
 
+    public long getTotalRequestsCount() {
+        return repository.count();
+    }
+
+    public long getRequestsByStatusCount(String status) {
+        return repository.countByStatusIgnoreCase(status);
+    }
+
+
 }
