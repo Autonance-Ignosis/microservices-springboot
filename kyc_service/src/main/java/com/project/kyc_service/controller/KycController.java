@@ -273,4 +273,9 @@ public class KycController {
         return ResponseEntity.status(201).body(Map.of("error", "Provide Better Resolution Image or Error Details: " ));
 
     }
+
+    @GetMapping("/pending")
+    public List<KycRecord> getPending() {
+        return kycService.getKycPendingRequest();
+    }
 }

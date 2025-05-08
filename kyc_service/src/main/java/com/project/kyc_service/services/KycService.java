@@ -99,5 +99,12 @@ public class KycService {
         return records;
     }
 
+    public List<KycRecord>getKycPendingRequest()
+    {
+
+        return repository.getKycPendingRequest();
+
+    }
+
 
 }
